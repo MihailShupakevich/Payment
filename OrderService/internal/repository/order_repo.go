@@ -2,7 +2,6 @@ package repository
 
 import (
 	"Payment/internal/domain"
-	"errors"
 	"gorm.io/gorm"
 )
 
@@ -13,10 +12,16 @@ type OrderRepoImpl struct {
 	Database *gorm.DB
 }
 
+func New(database *gorm.DB) OrderRepo {
+	return &OrderRepoImpl{
+		Database: database,
+	}
+}
+
 func (r *OrderRepoImpl) PostOrder(order domain.Orders) (domain.Orders, error) {
-	err := r.Database.Create(&order)
-	if err != nil {
-		return domain.Orders{}, errors.New("error creating order")
+	nOrder := r.Database.Create(&order)
+	if nOrder.Error != nil {
+		return domain.Orders{}, nOrder.Error
 	}
 	return order, nil
 }

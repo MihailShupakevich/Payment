@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"Payment/internal/domain"
-	"Payment/internal/repository"
+	"Payment/OrderService/internal/domain"
+	"Payment/OrderService/internal/repository"
 	"fmt"
 )
 
@@ -12,6 +12,7 @@ type OrderUsecase struct {
 
 type OrderUseCaseInterface interface {
 	PostOrder(order domain.Orders) (domain.Orders, error)
+	UpdateOrder(orderId int, NewStatus string) (domain.Orders, error)
 }
 
 func New(orderRepo repository.OrderRepo) *OrderUsecase {
@@ -25,4 +26,12 @@ func (o *OrderUsecase) PostOrder(order domain.Orders) (domain.Orders, error) {
 		return domain.Orders{}, err
 	}
 	return newOrder, nil
+}
+
+func (o *OrderUsecase) UpdateOrder(orderId int, NewStatus string) (domain.Orders, error) {
+	response, err := o.OrderRepo.UpdateOrder(orderId, NewStatus)
+	if err != nil {
+		return domain.Orders{}, err
+	}
+	return response, nil
 }

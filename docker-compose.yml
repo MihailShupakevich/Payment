@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  order-service:
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    depends_on:
+      - kafka
+      - db  # Зависимость от базы данных
+    networks:
+      - kafka-network
+    ports:
+      - "8080:8080"  # Порт для доступа к API order-service
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: PaymentService/Dockerfile
+    depends_on:
+      - kafka
+    networks:
+      - kafka-network
+    # Порты не нужны, если только этот сервис не предоставляет API или не требует внешнего доступа
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: payment
+    networks:
+      - kafka-network
+    ports:
+      - "5433:5432"  # Порт для доступа к базе данных
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      - kafka-network
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka-network
+
+
+
+
+networks:
+  kafka-network:
+    driver: bridge

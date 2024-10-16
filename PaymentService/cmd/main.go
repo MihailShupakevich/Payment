@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Payment/OrderService/internal/domain"
-	"Payment/OrderService/internal/kafka"
+	"Payment/PaymentService/internal/domain"
+	"Payment/PaymentService/internal/kafka"
 	"encoding/json"
 	"github.com/IBM/sarama"
 	"log"
@@ -25,9 +25,8 @@ func main() {
 
 	// Канал для получения сообщений
 	responseChannel := make(chan *sarama.ConsumerMessage)
-	go kafkaConsumer.Consume("orders", 0, responseChannel) // Подписка на топик "orders"
+	go kafkaConsumer.Consume("orders", 0, responseChannel)
 
-	// Горутина для обработки полученных заказов
 	go func() {
 		for msg := range responseChannel {
 			var order domain.Orders
@@ -36,16 +35,13 @@ func main() {
 				continue
 			}
 
-			// Здесь вы можете реализовать логику обработки заказа
-			newStatus := processOrder(order) // например, обработка заказа
+			newStatus := processOrder(order)
 
-			// Подготовка ответа
 			response := domain.OrderResponse{
-				OrderID:   strconv.Itoa(order.Id), // Убедитесь, что это соответствует типу данных
+				OrderID:   strconv.Itoa(order.Id),
 				NewStatus: newStatus,
 			}
 
-			// Отправка ответа обратно в Kafka
 			responseData, err := json.Marshal(response)
 			if err != nil {
 				log.Printf("Failed to marshal response: %v", err)
@@ -59,19 +55,15 @@ func main() {
 		}
 	}()
 
-	// Держим приложение работающим
 	select {}
 }
 
-// Логика обработки заказа (можно заполнить по необходимости)
 func processOrder(order domain.Orders) string {
-	// Ваша логика обработки заказа
-	// Например, проверка наличия товара, обработка платежа и т.д.
-	// Возвращаем статус после обработки
+
 	randomValue := order.Id % 7
 	time.Sleep(time.Duration(randomValue) * time.Second)
 	if randomValue < 5 {
-		return "Paid" // Замените на нужный статус
+		return "Paid"
 	} else {
 		return "Canseled"
 	}

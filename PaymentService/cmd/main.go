@@ -59,12 +59,11 @@ func main() {
 }
 
 func processOrder(order domain.Orders) string {
-
 	randomValue := order.Id % 7
 	time.Sleep(time.Duration(randomValue) * time.Second)
 	if randomValue < 5 {
 		return "Paid"
 	} else {
-		return "Canseled"
+		return "Canceled"
 	}
 }

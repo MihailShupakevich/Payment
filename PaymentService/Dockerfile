@@ -10,14 +10,14 @@ COPY ./go.mod ./go.sum ./
 # Загружаем зависимости
 RUN go mod download
 
-# Копируем код PaymentService
+# Копируем код OrderService
 COPY . ./
 
-# Переход в директорию PaymentService для сборки
-WORKDIR /app/PaymentService/cmd
+# Переход в директорию OrderService для сборки
+WORKDIR /app/OrderService/cmd
 
 # Сборка приложения
-RUN CGO_ENABLED=0 GOOS=linux go build -o payment-service .
+RUN CGO_ENABLED=0 GOOS=linux go build -o order-service .
 
 # Используем легкий образ для выполнения
 FROM alpine:latest
@@ -25,7 +25,7 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Копируем скомпилированный бинарный файл из builder
-COPY --from=builder /app/PaymentService/cmd/payment-service .
+COPY --from=builder /app/OrderService/cmd/order-service .
 
 # Запускаем приложение
-CMD ["./payment-service"]
+CMD ["./order-service"]

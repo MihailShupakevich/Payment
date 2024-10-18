@@ -8,15 +8,15 @@ import (
 	"Payment/OrderService/internal/repository"
 	"Payment/OrderService/internal/usecase"
 	"encoding/json"
+	"fmt"
 	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"log"
 	"strconv"
-	"time"
 )
 
 func main() {
-	time.Sleep(5 * time.Second)
+
 	databaseConnect, err := db.Db()
 	if err != nil {
 		panic(err)
@@ -40,12 +40,13 @@ func main() {
 	responseChannel := make(chan *sarama.ConsumerMessage)
 	go kafkaConsumer.Consume("order_responses", 0, responseChannel) // Подписка на топик ответов
 
-	orderHandler := handler.New(orderUsecase, kafkaProducer)
+	orderHandler := handler.New(orderUsecase, kafkaProducer, kafkaConsumer)
 
 	// Горутина для обработки ответов
 	go func() {
 		for msg := range responseChannel {
 			var response domain.OrderResponse
+			fmt.Println("HEZZZ")
 			if err := json.Unmarshal(msg.Value, &response); err != nil {
 				log.Printf("Failed to unmarshal message: %v", err)
 				continue

@@ -29,6 +29,7 @@ func (o *OrderUsecase) PostOrder(order domain.Orders) (domain.Orders, error) {
 }
 
 func (o *OrderUsecase) UpdateOrder(orderId int, NewStatus string) (domain.Orders, error) {
+	fmt.Println("UC 2")
 	response, err := o.OrderRepo.UpdateOrder(orderId, NewStatus)
 	if err != nil {
 		return domain.Orders{}, err
